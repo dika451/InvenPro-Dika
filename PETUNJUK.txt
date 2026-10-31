@@ -1,0 +1,16 @@
+INVENPRO - TAHAP 3
+
+Isi folder:
+- index.html: tampilan aplikasi
+- style.css: desain aplikasi
+- script.js: fungsi aplikasi dan transaksi stok
+- supabase_tahap3.sql: migrasi database transaksi
+
+PENTING:
+1. Backup/salin folder InvenPro Tahap 2 terlebih dahulu.
+2. Jalankan supabase_tahap3.sql di Supabase > SQL Editor > New query > Run.
+3. Setelah SQL sukses, salin 3 file web (index.html, style.css, script.js) ke folder project InvenPro.
+4. Jangan hapus atau mengganti file konfigurasi project lain yang tidak ada di paket ini.
+5. Jalankan dengan Live Server dan login seperti biasa.
+
+Tabel barang yang sudah ada tidak dihapus atau diubah. Riwayat transaksi memakai tabel baru transaksi_stok.

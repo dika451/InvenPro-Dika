@@ -1,158 +1,226 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Informasi Inventaris Pro</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101828">
+  <title>InvenPro — Sistem Informasi Inventaris</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <section id="login-page" class="login-page">
+    <div class="login-decoration"><span></span><span></span><span></span></div>
+    <div class="login-box">
+      <div class="brand brand-login"><span class="brand-mark"><i class="fa-solid fa-boxes-stacked"></i></span><span>Inven<span class="brand-accent">Pro</span></span></div>
+      <p class="eyebrow">INVENTORY MANAGEMENT SYSTEM</p>
+      <h1>Selamat datang kembali</h1>
+      <p class="muted login-intro">Masuk untuk mengelola dan memantau inventaris Anda.</p>
+      <form id="form-login">
+        <label class="field-label" for="login-email">Email</label>
+        <div class="field-wrap"><i class="fa-regular fa-envelope"></i><input type="email" id="login-email" placeholder="nama@email.com" autocomplete="username" required></div>
+        <label class="field-label" for="login-password">Password</label>
+        <div class="field-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="login-password" placeholder="Masukkan password" autocomplete="current-password" required></div>
+        <button type="submit" class="btn btn-primary login-submit" id="login-submit">Masuk ke InvenPro <i class="fa-solid fa-arrow-right"></i></button>
+        <p id="login-error" class="form-error" role="alert"></p>
+      </form>
+      <p class="login-foot">InvenPro <span>•</span> Kelola inventaris lebih mudah</p>
+    </div>
+  </section>
 
-    <!-- ================= HALAMAN LOGIN ================= -->
-    <div id="login-page" class="login-container">
-        <div class="login-box">
-            <div class="logo" style="justify-content: center; margin-bottom: 20px;">
-                <i class="fa-solid fa-boxes-stacked"></i> <span>InvenPro</span>
-            </div>
-            <h2>Login Sistem</h2>
-            <p>Silakan masuk untuk mengelola inventaris.</p>
-            
-            <form id="form-login">
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="login-email" placeholder="admin@email.com" required>
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="login-password" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn-primary">Masuk <i class="fa-solid fa-arrow-right-to-bracket"></i></button>
+  <div id="dashboard-page" class="app-shell" style="display:none">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand sidebar-brand" href="#" aria-label="InvenPro">
+        <span class="brand-mark"><i class="fa-solid fa-boxes-stacked"></i></span><span>Inven<span class="brand-accent">Pro</span></span>
+      </a>
+      <div class="side-label">MENU UTAMA</div>
+      <nav class="menu">
+        <button class="menu-item active" type="button" data-scroll="overview"><i class="fa-solid fa-grid-2"></i><span>Dashboard</span></button>
+        <button class="menu-item" type="button" data-scroll="inventory"><i class="fa-solid fa-box"></i><span>Data Barang</span></button>
+        <button class="menu-item" type="button" data-scroll="transactions"><i class="fa-solid fa-arrow-right-arrow-left"></i><span>Transaksi Stok</span></button>
+        <button class="menu-item" type="button" data-scroll="reports"><i class="fa-solid fa-chart-column"></i><span>Laporan Inventaris</span></button>
+        
+        <button class="menu-item" type="button" data-scroll="users" id="menu-users" hidden>
+        <i class="fa-solid fa-users"></i>
+        <span>Manajemen Pengguna</span>
+        </button>
+
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="help-card"><span class="help-icon"><i class="fa-regular fa-circle-question"></i></span><strong>Butuh bantuan?</strong><p>Kelola data inventaris dengan teliti dan rutin.</p></div>
+        <button class="logout-btn" type="button" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i><span>Keluar</span></button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn mobile-menu" id="mobile-menu" type="button" aria-label="Buka menu"><i class="fa-solid fa-bars"></i></button>
+          <div><p class="eyebrow">OVERVIEW</p><h1>Dashboard</h1></div>
+        </div>
+        <div class="topbar-right">
+          <div class="date-chip"><i class="fa-regular fa-calendar"></i><span id="today-label">Hari ini</span></div>
+          <div class="profile-chip"><div class="avatar">A</div><div class="profile-copy"><strong>Administrator</strong><span>Pengelola sistem</span></div></div>
+        </div>
+      </header>
+
+      <section id="overview" class="page-section">
+        <div class="welcome-row"><div><h2>Ringkasan inventaris</h2><p class="muted">Pantau kondisi persediaan barang dalam satu tempat.</p></div><span class="live-status"><span></span> Terhubung ke sistem</span></div>
+        <div class="stats-grid">
+          <article class="stat-card"><div class="stat-top"><span class="stat-icon stat-blue"><i class="fa-solid fa-boxes-stacked"></i></span><span class="stat-caption">ITEM</span></div><p class="stat-title">Total Jenis Barang</p><h2 id="total-barang">0</h2><p class="stat-note">Jumlah jenis inventaris tercatat</p></article>
+          <article class="stat-card"><div class="stat-top"><span class="stat-icon stat-green"><i class="fa-solid fa-cubes"></i></span><span class="stat-caption">UNIT</span></div><p class="stat-title">Total Stok</p><h2 id="total-stok">0</h2><p class="stat-note">Akumulasi seluruh unit barang</p></article>
+          <article class="stat-card"><div class="stat-top"><span class="stat-icon stat-orange"><i class="fa-solid fa-triangle-exclamation"></i></span><span class="stat-caption">PERLU CEK</span></div><p class="stat-title">Stok Menipis</p><h2 id="stok-menipis">0</h2><p class="stat-note">Barang dengan stok kurang dari 5</p></article>
+        </div>
+      </section>
+
+      <section id="inventory" class="inventory-section page-section">
+        <div class="section-heading"><div><p class="eyebrow">INVENTORY MANAGEMENT</p><h2>Data Inventaris</h2><p class="muted">Tambah, cari, dan perbarui data barang.</p></div></div>
+        <div class="content-grid">
+          <section class="panel form-panel">
+            <div class="panel-heading"><div><span class="panel-icon"><i class="fa-solid fa-plus"></i></span><div><h3 id="form-title">Tambah Barang</h3><p>Lengkapi informasi barang</p></div></div></div>
+            <form id="form-barang">
+              <input type="hidden" id="edit-id">
+              <div class="input-group"><label for="nama-barang">Nama Barang *</label><input type="text" id="nama-barang" placeholder="Contoh: Laptop Asus" maxlength="100" required></div>
+              <div class="input-group"><label for="kategori-barang">Kategori *</label><select id="kategori-barang" required><option value="">Pilih kategori</option><option value="Elektronik">Elektronik</option><option value="ATK">Alat Tulis Kantor (ATK)</option><option value="Furnitur">Furnitur</option></select></div>
+              <div class="input-group"><label for="stok-barang">Jumlah Stok *</label><input type="number" id="stok-barang" placeholder="Masukkan jumlah stok" min="1" step="1" required></div>
+              <div class="input-group"><label for="harga-barang">Harga per Unit (Rp)</label><input type="number" id="harga-barang" placeholder="Contoh: 2500000" min="0" step="100" value="0"></div>
+              <div class="input-group"><label for="lokasi-barang">Lokasi Penyimpanan</label><input type="text" id="lokasi-barang" placeholder="Contoh: Gudang A / Rak 02" maxlength="120"></div>
+              <div class="input-group"><label for="tanggal-masuk">Tanggal Masuk</label><input type="date" id="tanggal-masuk"></div>
+              <div class="input-group"><label for="kondisi-barang">Kondisi Barang</label><select id="kondisi-barang"><option value="Baik">Baik</option><option value="Perlu Perbaikan">Perlu Perbaikan</option><option value="Rusak">Rusak</option></select></div>
+              <div class="input-group"><label for="foto-barang">Foto Barang</label><input type="file" id="foto-barang" accept="image/png,image/jpeg,image/webp"><small class="field-help">JPG, PNG, atau WEBP. Maksimal 3 MB.</small><div id="foto-preview" class="photo-preview" hidden></div></div>
+              <button type="submit" id="btn-submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tambah Barang</button>
+              <button type="button" id="btn-cancel" class="btn btn-light" style="display:none" onclick="resetForm()">Batal Edit</button>
             </form>
+            <div class="form-hint"><i class="fa-regular fa-lightbulb"></i><span>Kolom bertanda * wajib diisi. Informasi lainnya dapat dilengkapi sesuai kebutuhan.</span></div>
+          </section>
+
+          <section class="panel table-panel">
+            <div class="table-heading"><div><h3>Daftar Barang</h3><p class="muted">Data inventaris yang tersimpan</p></div><span class="data-count" id="data-count">0 data</span></div>
+            <div class="table-tools">
+              <div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input type="search" id="search-input" placeholder="Cari nama, kode, atau lokasi..." aria-label="Cari barang"></div>
+              <select id="filter-kategori" class="filter-select" aria-label="Filter kategori"><option value="Semua">Semua kategori</option><option value="Elektronik">Elektronik</option><option value="ATK">ATK</option><option value="Furnitur">Furnitur</option></select>
+            </div>
+            <div class="table-wrap"><table id="tabel-barang"><thead><tr><th>No.</th><th>Kode</th><th>Foto</th><th>Nama Barang</th><th>Kategori</th><th>Stok</th><th>Harga/Unit</th><th>Lokasi</th><th>Kondisi</th><th>Status Stok</th><th>Aksi</th></tr></thead><tbody></tbody></table></div>
+            <div class="table-footer"><span id="table-summary">Menampilkan 0 barang</span><span class="table-footer-note"><i class="fa-solid fa-shield-halved"></i> Data tersimpan di Supabase</span></div>
+          </section>
         </div>
+      </section>
+      <section id="transactions" class="page-section transaction-section">
+        <div class="section-heading"><div><p class="eyebrow">STOCK MOVEMENT</p><h2>Transaksi Stok</h2><p class="muted">Catat barang masuk dan keluar. Stok akan diperbarui otomatis.</p></div></div>
+        <div class="transaction-grid">
+          <section class="panel form-panel">
+            <div class="panel-heading"><div><span class="panel-icon"><i class="fa-solid fa-arrow-right-arrow-left"></i></span><div><h3>Catat Transaksi</h3><p>Isi pergerakan stok barang</p></div></div></div>
+            <form id="form-transaksi">
+              <div class="input-group"><label for="transaksi-barang">Pilih Barang *</label><select id="transaksi-barang" required><option value="">Pilih barang</option></select></div>
+              <div class="input-group"><label for="transaksi-jenis">Jenis Transaksi *</label><select id="transaksi-jenis" required><option value="masuk">Stok Masuk</option><option value="keluar">Stok Keluar</option></select></div>
+              <div class="input-group"><label for="transaksi-jumlah">Jumlah *</label><input type="number" id="transaksi-jumlah" min="1" step="1" placeholder="Masukkan jumlah" required></div>
+              <div class="input-group"><label for="transaksi-keterangan">Keterangan</label><input type="text" id="transaksi-keterangan" maxlength="250" placeholder="Contoh: Pembelian barang"></div>
+              <button type="submit" id="btn-transaksi" class="btn btn-primary"><i class="fa-solid fa-check"></i> Simpan Transaksi</button>
+            </form>
+            <div class="form-hint"><i class="fa-regular fa-lightbulb"></i><span>Stok keluar tidak dapat melebihi jumlah stok yang tersedia.</span></div>
+          </section>
+          <section class="panel table-panel">
+            <div class="table-heading"><div><h3>Riwayat Transaksi</h3><p class="muted">Catatan stok masuk dan keluar terbaru</p></div><span class="data-count" id="transaction-count">0 transaksi</span></div>
+            <div class="table-wrap transaction-table-wrap"><table id="tabel-transaksi"><thead><tr><th>No.</th><th>Tanggal</th><th>Barang</th><th>Jenis</th><th>Jumlah</th><th>Keterangan</th></tr></thead><tbody id="transaksi-body"><tr><td colspan="6" class="empty-state">Belum ada transaksi.</td></tr></tbody></table></div>
+            <div class="table-footer"><span id="transaction-summary">Menampilkan 0 transaksi</span><span class="table-footer-note"><i class="fa-solid fa-clock-rotate-left"></i> Maksimal 100 transaksi terbaru</span></div>
+          </section>
+        </div>
+      </section>
+      <section id="reports" class="page-section report-section">
+        <div class="section-heading">
+          <div><p class="eyebrow">INVENTORY REPORTS</p><h2>Laporan Inventaris</h2>
+          <p class="muted">Ringkasan data barang dan pergerakan stok berdasarkan periode.</p></div>
+        </div>
+        <section class="panel report-filter-panel">
+          <div class="report-filter-heading"><div><h3>Filter Periode</h3><p>Pilih rentang tanggal transaksi yang ingin ditampilkan.</p></div>
+            <button type="button" id="btn-reset-report" class="btn btn-light report-reset">Reset</button>
+          </div>
+          <div class="report-filter-fields">
+            <div class="input-group"><label for="report-start">Dari Tanggal</label><input type="date" id="report-start"></div>
+            <div class="input-group"><label for="report-end">Sampai Tanggal</label><input type="date" id="report-end"></div>
+            <button type="button" id="btn-filter-report" class="btn btn-primary"><i class="fa-solid fa-filter"></i> Terapkan Filter</button>
+          </div>
+        </section>
+        <div class="report-stats-grid">
+          <article class="stat-card"><div class="stat-top"><span class="stat-icon stat-blue"><i class="fa-solid fa-boxes-stacked"></i></span><span class="stat-caption">INVENTARIS</span></div><p class="stat-title">Total Jenis Barang</p><h2 id="report-total-items">0</h2><p class="stat-note">Barang yang terdaftar saat ini</p></article>
+          <article class="stat-card"><div class="stat-top"><span class="stat-icon stat-green"><i class="fa-solid fa-arrow-down"></i></span><span class="stat-caption">STOK MASUK</span></div><p class="stat-title">Total Stok Masuk</p><h2 id="report-total-in">0</h2><p class="stat-note">Dalam periode terpilih</p></article>
+          <article class="stat-card"><div class="stat-top"><span class="stat-icon stat-orange"><i class="fa-solid fa-arrow-up"></i></span><span class="stat-caption">STOK KELUAR</span></div><p class="stat-title">Total Stok Keluar</p><h2 id="report-total-out">0</h2><p class="stat-note">Dalam periode terpilih</p></article>
+          <article class="stat-card"><div class="stat-top"><span class="stat-icon stat-blue"><i class="fa-solid fa-cubes"></i></span><span class="stat-caption">NILAI STOK</span></div><p class="stat-title">Estimasi Nilai Inventaris</p><h2 id="report-stock-value">Rp0</h2><p class="stat-note">Stok saat ini × harga per unit</p></article>
+        </div>
+        <section class="panel report-chart-panel">
+          <div class="table-heading report-panel-heading"><div><h3>Pergerakan Stok</h3><p class="muted">Perbandingan jumlah stok masuk dan keluar pada periode terpilih.</p></div></div>
+          <div id="report-chart" class="report-chart" aria-live="polite">
+            <div class="report-chart-empty">Belum ada transaksi pada periode ini.</div>
+          </div>
+          <div class="report-chart-legend"><span><i class="legend-dot legend-in"></i> Stok Masuk</span><span><i class="legend-dot legend-out"></i> Stok Keluar</span></div>
+        </section>
+        <section class="panel report-table-panel">
+          <div class="table-heading report-panel-heading"><div><h3>Detail Transaksi</h3><p class="muted">Seluruh transaksi sesuai filter tanggal.</p></div><span class="data-count" id="report-transaction-count">0 transaksi</span></div>
+          <div class="report-actions">
+            <button type="button" class="btn btn-light" id="btn-export-csv"><i class="fa-solid fa-file-excel"></i> Export Excel (CSV)</button>
+            <button type="button" class="btn btn-light" id="btn-print-report"><i class="fa-solid fa-file-pdf"></i> Cetak / Simpan PDF</button>
+          </div>
+          <div class="table-wrap"><table id="tabel-laporan"><thead><tr><th>No.</th><th>Tanggal</th><th>Barang</th><th>Jenis</th><th>Jumlah</th><th>Keterangan</th></tr></thead><tbody id="report-transactions-body"><tr><td colspan="6" class="empty-state">Memuat laporan...</td></tr></tbody></table></div>
+          <div class="table-footer"><span id="report-summary">Menampilkan 0 transaksi</span><span class="table-footer-note"><i class="fa-solid fa-database"></i> Data dari Supabase</span></div>
+        </section>
+        <section class="panel report-inventory-panel">
+          <div class="table-heading report-panel-heading"><div><h3>Posisi Stok Saat Ini</h3><p class="muted">Daftar barang dan jumlah stok terkini.</p></div><span class="data-count" id="report-inventory-count">0 barang</span></div>
+          <div class="table-wrap"><table id="tabel-laporan-barang"><thead><tr><th>No.</th><th>Kode</th><th>Nama Barang</th><th>Kategori</th><th>Stok</th><th>Harga/Unit</th><th>Nilai Stok</th></tr></thead><tbody id="report-inventory-body"><tr><td colspan="7" class="empty-state">Memuat data...</td></tr></tbody></table></div>
+        </section>
+      </section>
+      
+<section id="users" class="page-section">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">USER MANAGEMENT</p>
+      <h2>Manajemen Pengguna</h2>
+      <p class="muted">Kelola akun dan hak akses pengguna InvenPro.</p>
+    </div>
+  </div>
+
+  <section class="panel">
+    <div class="table-heading">
+      <div>
+        <h3>Daftar Pengguna</h3>
+        <p class="muted">Informasi akun Admin dan Petugas.</p>
+      </div>
+      <span class="data-count" id="user-count">0 pengguna</span>
     </div>
 
-    <!-- ================= HALAMAN DASHBOARD (Tersembunyi by default) ================= -->
-    <div id="dashboard-page" style="display: none;">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="logo">
-                <i class="fa-solid fa-boxes-stacked"></i> <span>InvenPro</span>
-            </div>
-            <ul class="menu">
-                <li class="active"><i class="fa-solid fa-gauge"></i> Dashboard</li>
-                <li><i class="fa-solid fa-box"></i> Barang</li>
-                <li><i class="fa-solid fa-chart-line"></i> Laporan</li>
-            </ul>
-            <div style="margin-top: auto; padding: 20px;">
-                <button onclick="logout()" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
-            </div>
-        </div>
-
-        <!-- Konten Utama -->
-        <div class="main-content">
-            <header>
-                <div>
-                    <h1>Dashboard Inventaris</h1>
-                    <p>Selamat datang kembali, Admin.</p>
-                </div>
-                <div class="user-profile">
-                    <img src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" alt="User">
-                </div>
-            </header>
-
-            <!-- Kartu Statistik -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="icon blue"><i class="fa-solid fa-boxes-stacked"></i></div>
-                    <div>
-                        <h3>Total Barang</h3>
-                        <h2 id="total-barang">0</h2>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="icon green"><i class="fa-solid fa-cubes"></i></div>
-                    <div>
-                        <h3>Total Stok</h3>
-                        <h2 id="total-stok">0</h2>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="icon orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                    <div>
-                        <h3>Stok Menipis (< 5)</h3>
-                        <h2 id="stok-menipis">0</h2>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid-layout">
-                <!-- Form Tambah/Edit Barang -->
-                <div class="card form-card">
-                    <h3 id="form-title">Tambah Barang Baru</h3>
-                    <form id="form-barang">
-                        <input type="hidden" id="edit-id">
-                        <div class="input-group">
-                            <label>Nama Barang</label>
-                            <input type="text" id="nama-barang" placeholder="Cth: Laptop Asus" required>
-                        </div>
-                        <div class="input-group">
-                            <label>Kategori</label>
-                            <select id="kategori-barang" required>
-                                <option value="">-- Pilih Kategori --</option>
-                                <option value="Elektronik">Elektronik</option>
-                                <option value="ATK">Alat Tulis Kantor (ATK)</option>
-                                <option value="Furnitur">Furnitur</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>Jumlah Stok</label>
-                            <input type="number" id="stok-barang" placeholder="Cth: 10" min="1" required>
-                        </div>
-                        <button type="submit" id="btn-submit" class="btn-primary"><i class="fa-solid fa-plus"></i> Tambah Barang</button>
-                        <button type="button" id="btn-cancel" class="btn-secondary" style="display:none; margin-top: 10px;" onclick="resetForm()">Batal Edit</button>
-                    </form>
-                </div>
-
-                <!-- Tabel Data Barang -->
-                <div class="card table-card">
-                    <div class="table-header">
-                        <h3>Daftar Inventaris</h3>
-                        <div class="table-tools">
-                            <div class="search-box">
-                                <i class="fa-solid fa-search"></i>
-                                <input type="text" id="search-input" placeholder="Cari barang...">
-                            </div>
-                            <select id="filter-kategori" class="filter-select">
-                                <option value="Semua">Semua Kategori</option>
-                                <option value="Elektronik">Elektronik</option>
-                                <option value="ATK">ATK</option>
-                                <option value="Furnitur">Furnitur</option>
-                            </select>
-                        </div>
-                    </div>
-                    <table id="tabel-barang">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Nama Barang</th>
-                                <th>Kategori</th>
-                                <th>Stok</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Nama</th>
+            <th>Email</th>
+            <th>Hak Akses</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="user-table-body">
+          <tr>
+            <td colspan="5" class="empty-state">
+              Data pengguna belum dimuat.
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  </section>
+</section>
 
-    <!-- Toast Notifikasi -->
-    <div id="toast" class="toast">Data berhasil disimpan!</div>
+      <footer class="app-footer"><span>© <span id="year-label"></span> InvenPro</span><span>Sistem Informasi Inventaris</span></footer>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"><i class="fa-solid fa-circle-check"></i><span>Data berhasil disimpan</span></div>
+  
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="script.js"></script>
 
-    <!-- Panggil Supabase JS Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="script.js"></script>
 </body>
 </html>
