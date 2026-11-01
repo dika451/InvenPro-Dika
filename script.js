@@ -133,6 +133,175 @@ async function ambilDataDariSupabase() {
   }
   return data || [];
 }
+// =================================
+// SISTEM ACTIVITY LOG
+// =================================
+
+async function catatAktivitas(aktivitas, detail = '') {
+  try {
+    const { data: { user }, error: authError } =
+      await supabaseClient.auth.getUser();
+
+    if (authError || !user) {
+      console.error('Pengguna tidak ditemukan:', authError);
+      return;
+    }
+
+    const namaPengguna =
+      profilPengguna?.nama || user.email || 'Pengguna';
+
+    const { error } = await supabaseClient
+      .from('activity_logs')
+      .insert({
+        user_id: user.id,
+        nama_pengguna: namaPengguna,
+        aktivitas: aktivitas,
+        detail: detail
+      });
+
+    if (error) {
+      console.error('Gagal menyimpan activity log:', error);
+    }
+  } catch (error) {
+    console.error('Kesalahan Activity Log:', error);
+  }
+}
+
+// =================================
+// MEMUAT DATA ACTIVITY LOG
+// =================================
+
+async function muatActivityLog() {
+  if (rolePengguna !== 'admin') return;
+
+  const tbody = document.getElementById('activity-body');
+  const count = document.getElementById('activity-count');
+
+  if (!tbody || !count) return;
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="5" class="empty-state">
+        Memuat riwayat aktivitas...
+      </td>
+    </tr>
+  `;
+
+  const { data, error } = await supabaseClient
+    .from('activity_logs')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (error) {
+    console.error('Gagal memuat Activity Log:', error);
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty-state">
+          Gagal memuat riwayat aktivitas.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  count.textContent = `${data.length} aktivitas`;
+
+  if (data.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty-state">
+          Belum ada aktivitas.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = data.map((log, index) => `
+    <tr>
+      <td>${index + 1}</td>
+      <td>${escapeHTML(log.nama_pengguna || 'Pengguna')}</td>
+      <td>${escapeHTML(log.aktivitas || '-')}</td>
+      <td>${escapeHTML(log.detail || '-')}</td>
+      <td>${new Date(log.created_at).toLocaleString('id-ID')}</td>
+    </tr>
+  `).join('');
+}
+
+
+// =================================
+// SISTEM NOTIFIKASI STOK INVENTARIS
+// =================================
+
+function renderNotifikasi() {
+  const notificationCount = document.getElementById('notification-count');
+  const notificationList = document.getElementById('notification-list');
+  const notificationSubtitle = document.getElementById('notification-subtitle');
+
+  if (!notificationCount || !notificationList) return;
+
+  const barangBermasalah = dataBarang.filter((barang) => {
+    return Number(barang.stok) <= 5;
+  });
+
+  notificationCount.textContent =
+    barangBermasalah.length > 99 ? '99+' : barangBermasalah.length;
+
+  if (notificationSubtitle) {
+    notificationSubtitle.textContent =
+      `${barangBermasalah.length} barang perlu diperiksa`;
+  }
+
+  notificationList.textContent = '';
+
+  if (barangBermasalah.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'notification-empty';
+
+    const icon = document.createElement('i');
+    icon.className = 'fa-solid fa-circle-check';
+
+    const message = document.createElement('p');
+    message.textContent = 'Semua stok barang dalam kondisi aman.';
+
+    empty.append(icon, message);
+    notificationList.appendChild(empty);
+    return;
+  }
+
+  barangBermasalah.forEach((barang) => {
+    const stok = Number(barang.stok);
+    const habis = stok <= 0;
+
+    const item = document.createElement('div');
+    item.className = 'notification-item';
+
+    const icon = document.createElement('div');
+    icon.className = `notification-icon ${habis ? 'danger' : 'warning'}`;
+
+    const iconElement = document.createElement('i');
+    iconElement.className = habis
+      ? 'fa-solid fa-circle-exclamation'
+      : 'fa-solid fa-triangle-exclamation';
+
+    icon.appendChild(iconElement);
+
+    const content = document.createElement('div');
+    content.className = 'notification-content';
+
+    const title = document.createElement('strong');
+    title.textContent = habis ? 'Stok Barang Habis' : 'Stok Barang Menipis';
+
+    const description = document.createElement('p');
+    description.textContent =
+      `${barang.nama || 'Barang tanpa nama'} — Sisa stok: ${stok}`;
+
+    content.append(title, description);
+    item.append(icon, content);
+    notificationList.appendChild(item);
+  });
+}
 
 async function unggahFoto(file) {
   if (!file) return '';
@@ -159,21 +328,73 @@ async function unggahFoto(file) {
   return data.publicUrl;
 }
 
+
 async function tambahKeSupabase(payload) {
-  const { error } = await supabaseClient.from('barang').insert([payload]);
-  if (error) { console.error(error); tampilkanToast('Gagal menyimpan: ' + error.message); return false; }
+  const { error } = await supabaseClient
+    .from('barang')
+    .insert([payload]);
+
+  if (error) {
+    console.error(error);
+    tampilkanToast('Gagal menyimpan: ' + error.message);
+    return false;
+  }
+
+  // Catat aktivitas penambahan barang
+  await catatAktivitas(
+    'Menambahkan Barang',
+    `Menambahkan barang ${payload.nama || 'Tanpa Nama'} dengan kode ${payload.kode_barang || '-'}`
+  );
+
   return true;
 }
+
 
 async function updateKeSupabase(id, payload) {
-  const { error } = await supabaseClient.from('barang').update(payload).eq('id', id);
-  if (error) { console.error(error); tampilkanToast('Gagal memperbarui: ' + error.message); return false; }
+  const { error } = await supabaseClient
+    .from('barang')
+    .update(payload)
+    .eq('id', id);
+
+  if (error) {
+    console.error(error);
+    tampilkanToast('Gagal memperbarui: ' + error.message);
+    return false;
+  }
+
+  // Catat aktivitas perubahan barang
+  await catatAktivitas(
+    'Mengedit Barang',
+    `Memperbarui data barang ${payload.nama || 'ID ' + id}`
+  );
+
   return true;
 }
 
+
 async function hapusDariSupabase(id) {
-  const { error } = await supabaseClient.from('barang').delete().eq('id', id);
-  if (error) { console.error(error); tampilkanToast('Gagal menghapus: ' + error.message); return false; }
+  // Ambil data barang sebelum dihapus
+  const barangDihapus = dataBarang.find(
+    (barang) => String(barang.id) === String(id)
+  );
+
+  const { error } = await supabaseClient
+    .from('barang')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error(error);
+    tampilkanToast('Gagal menghapus: ' + error.message);
+    return false;
+  }
+
+  // Catat aktivitas penghapusan
+  await catatAktivitas(
+    'Menghapus Barang',
+    `Menghapus barang ${barangDihapus?.nama || 'ID ' + id}`
+  );
+
   return true;
 }
 
@@ -433,9 +654,24 @@ formTransaksi.addEventListener('submit', async (event) => {
       p_jumlah: jumlah,
       p_keterangan: keterangan || null
     });
-    if (error) throw error;
-    formTransaksi.reset();
-    await initData();
+    
+if (error) throw error;
+
+// Catat aktivitas transaksi stok
+const barangTransaksi = dataBarang.find(
+  (barang) => String(barang.id) === String(barangId)
+);
+
+const namaBarang = barangTransaksi?.nama || 'Barang';
+
+await catatAktivitas(
+  jenis === 'masuk' ? 'Stok Masuk' : 'Stok Keluar',
+  `${jenis === 'masuk' ? 'Menambahkan' : 'Mengurangi'} stok ${namaBarang} sebanyak ${jumlah} unit. Keterangan: ${keterangan || '-'}`
+);
+
+formTransaksi.reset();
+await initData();
+
     tampilkanToast(jenis === 'masuk' ? 'Stok masuk berhasil dicatat.' : 'Stok keluar berhasil dicatat.');
   } catch (error) {
     console.error('Transaksi stok gagal:', error);
@@ -719,12 +955,58 @@ async function muatProfilPengguna() {
   profilPengguna = data;
   rolePengguna = data.role;
 
-  const menuUsers = document.getElementById('menu-users');
+  // Perbarui profil pada topbar
+const namaProfil = data.nama || data.email || 'Pengguna';
+const roleProfil = data.role === 'admin' ? 'Administrator' : 'Petugas';
 
-  if (menuUsers) {
-    menuUsers.style.display =
-      rolePengguna === 'admin' ? 'flex' : 'none';
-  }
+const avatar = document.getElementById('profile-avatar');
+const nama = document.getElementById('profile-name');
+const role = document.getElementById('profile-role');
+
+if (avatar) {
+  avatar.textContent = namaProfil.charAt(0).toUpperCase();
+}
+
+if (nama) {
+  nama.textContent = namaProfil;
+}
+
+if (role) {
+  role.textContent = roleProfil;
+}
+
+// Perbarui informasi pada dropdown profil
+const dropdownAvatar = document.getElementById('dropdown-avatar');
+const dropdownNama = document.getElementById('dropdown-name');
+const dropdownEmail = document.getElementById('dropdown-email');
+
+if (dropdownAvatar) {
+  dropdownAvatar.textContent = namaProfil.charAt(0).toUpperCase();
+}
+
+if (dropdownNama) {
+  dropdownNama.textContent = namaProfil;
+}
+
+if (dropdownEmail) {
+  dropdownEmail.textContent = data.email || '';
+}
+
+  // Atur menu Manajemen Pengguna khusus Admin
+const menuUsers = document.getElementById('menu-users');
+
+if (menuUsers) {
+  menuUsers.style.display =
+    rolePengguna === 'admin' ? 'flex' : 'none';
+}
+
+// Atur menu Activity Log khusus Admin
+const menuActivity = document.getElementById('menu-activity');
+
+if (menuActivity) {
+  menuActivity.style.display =
+    rolePengguna === 'admin' ? 'flex' : 'none';
+}
 
   console.log('Profil pengguna:', profilPengguna);
   console.log('Role pengguna:', rolePengguna);
@@ -810,6 +1092,7 @@ async function initData() {
 
   if (hasil !== null) {
     dataBarang = hasil;
+    renderNotifikasi();
     renderTabel();
     renderPilihanBarang();
 
@@ -825,13 +1108,114 @@ async function initData() {
   }
 }
 
-document.querySelectorAll('[data-scroll]').forEach((button) => {
-  button.addEventListener('click', () => {
-    document.getElementById(button.dataset.scroll)?.scrollIntoView({ behavior: 'smooth' });
-    document.querySelectorAll('.menu-item').forEach((item) => item.classList.toggle('active', item === button));
-    document.getElementById('sidebar').classList.remove('open');
+const pageSections = document.querySelectorAll('.page-section');
+const menuItems = document.querySelectorAll('.menu-item[data-scroll]');
+
+function tampilkanHalaman(pageId, button) {
+  // Tampilkan hanya halaman yang dipilih
+  pageSections.forEach((section) => {
+    section.classList.toggle('active-page', section.id === pageId);
+  });
+
+  // Tandai menu yang sedang aktif
+  menuItems.forEach((item) => {
+    item.classList.toggle('active', item === button);
+  });
+
+  // Perbarui judul topbar sesuai halaman
+const judulHalaman = {
+  overview: ['OVERVIEW', 'Dashboard'],
+  inventory: ['INVENTORY MANAGEMENT', 'Data Barang'],
+  transactions: ['STOCK MANAGEMENT', 'Transaksi Stok'],
+  reports: ['INVENTORY REPORTS', 'Laporan Inventaris'],
+  users: ['USER MANAGEMENT', 'Manajemen Pengguna'],
+  activity: ['SYSTEM MONITORING', 'Activity Log']
+};
+
+const judul = judulHalaman[pageId];
+
+if (judul) {
+  document.getElementById('topbar-eyebrow').textContent = judul[0];
+  document.getElementById('topbar-title').textContent = judul[1];
+}
+  // Tutup sidebar pada tampilan HP
+  document.getElementById('sidebar')?.classList.remove('open');
+}
+
+// Navigasi setiap menu
+menuItems.forEach((button) => {
+  button.addEventListener('click', async () => {
+    const pageId = button.dataset.scroll;
+
+    tampilkanHalaman(pageId, button);
+
+    // Muat Activity Log saat halaman dibuka
+    if (pageId === 'activity' && rolePengguna === 'admin') {
+      await muatActivityLog();
+    }
   });
 });
+
+// Tampilkan Dashboard saat pertama kali dibuka
+// =================================
+// INTERAKSI DROPDOWN NOTIFIKASI
+// =================================
+
+const notificationToggle = document.getElementById('notification-toggle');
+const notificationDropdown = document.getElementById('notification-dropdown');
+
+if (notificationToggle && notificationDropdown) {
+  notificationToggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+
+    notificationDropdown.hidden = !notificationDropdown.hidden;
+
+    notificationToggle.setAttribute(
+      'aria-expanded',
+      String(!notificationDropdown.hidden)
+    );
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.notification-wrap')) {
+      notificationDropdown.hidden = true;
+      notificationToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+// Interaksi dropdown profil
+const profileToggle = document.getElementById('profile-toggle');
+const profileDropdown = document.getElementById('profile-dropdown');
+const profileLogout = document.getElementById('profile-logout');
+
+if (profileToggle && profileDropdown) {
+  profileToggle.addEventListener('click', () => {
+    profileDropdown.hidden = !profileDropdown.hidden;
+
+    profileToggle.setAttribute(
+      'aria-expanded',
+      String(!profileDropdown.hidden)
+    );
+  });
+
+  // Tutup dropdown ketika klik di luar profil
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.profile-menu-wrap')) {
+      profileDropdown.hidden = true;
+      profileToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+
+// Tombol Logout pada dropdown
+if (profileLogout) {
+  profileLogout.addEventListener('click', () => {
+    logout();
+  });
+}
+const menuDashboard = document.querySelector('.menu-item[data-scroll="overview"]');
+tampilkanHalaman('overview', menuDashboard);
+
 document.getElementById('mobile-menu').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
 document.getElementById('today-label').textContent = new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date());
 document.getElementById('year-label').textContent = new Date().getFullYear();

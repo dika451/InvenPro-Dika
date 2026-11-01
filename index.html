@@ -43,6 +43,13 @@
         <button class="menu-item" type="button" data-scroll="transactions"><i class="fa-solid fa-arrow-right-arrow-left"></i><span>Transaksi Stok</span></button>
         <button class="menu-item" type="button" data-scroll="reports"><i class="fa-solid fa-chart-column"></i><span>Laporan Inventaris</span></button>
         
+        <button class="menu-item" id="menu-activity" type="button"
+        data-scroll="activity" hidden>
+        id="menu-activity" hidden>
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>Activity Log</span>
+        </button>
+
         <button class="menu-item" type="button" data-scroll="users" id="menu-users" hidden>
         <i class="fa-solid fa-users"></i>
         <span>Manajemen Pengguna</span>
@@ -59,11 +66,71 @@
       <header class="topbar">
         <div class="topbar-left">
           <button class="icon-btn mobile-menu" id="mobile-menu" type="button" aria-label="Buka menu"><i class="fa-solid fa-bars"></i></button>
-          <div><p class="eyebrow">OVERVIEW</p><h1>Dashboard</h1></div>
+          <div>
+      <p class="eyebrow" id="topbar-eyebrow">OVERVIEW</p>
+      <h1 id="topbar-title">Dashboard</h1>
+        </div>
         </div>
         <div class="topbar-right">
           <div class="date-chip"><i class="fa-regular fa-calendar"></i><span id="today-label">Hari ini</span></div>
-          <div class="profile-chip"><div class="avatar">A</div><div class="profile-copy"><strong>Administrator</strong><span>Pengelola sistem</span></div></div>
+          <!-- NOTIFICATION CENTER -->
+<div class="notification-wrap">
+  <button
+    type="button"
+    class="notification-toggle"
+    id="notification-toggle"
+    aria-label="Notifikasi"
+    aria-expanded="false"
+  >
+    <i class="fa-regular fa-bell"></i>
+    <span class="notification-badge" id="notification-count">0</span>
+  </button>
+
+  <div class="notification-dropdown" id="notification-dropdown" hidden>
+    <div class="notification-header">
+      <div>
+        <strong>Notifikasi</strong>
+        <span id="notification-subtitle">Pemberitahuan inventaris</span>
+      </div>
+      <span class="notification-status">LIVE</span>
+    </div>
+
+    <div class="notification-list" id="notification-list">
+      <div class="notification-empty">
+        <i class="fa-regular fa-bell-slash"></i>
+        <p>Memuat notifikasi...</p>
+      </div>
+    </div>
+  </div>
+</div>
+          <div class="profile-menu-wrap">
+  <button class="profile-chip" id="profile-toggle"
+    type="button" aria-expanded="false">
+    <div class="avatar" id="profile-avatar">A</div>
+    <div class="profile-copy">
+      <strong id="profile-name">Administrator</strong>
+      <span id="profile-role">Pengelola sistem</span>
+    </div>
+    <i class="fa-solid fa-chevron-down"></i>
+  </button>
+
+  <div class="profile-dropdown" id="profile-dropdown" hidden>
+    <div class="dropdown-profile-info">
+      <div class="avatar" id="dropdown-avatar">A</div>
+      <div>
+        <strong id="dropdown-name">Administrator</strong>
+        <span id="dropdown-email">Email pengguna</span>
+      </div>
+    </div>
+
+    <div class="dropdown-divider"></div>
+
+    <button type="button" class="dropdown-logout" id="profile-logout">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      Logout
+    </button>
+  </div>
+</div>
         </div>
       </header>
 
@@ -205,6 +272,51 @@
           <tr>
             <td colspan="5" class="empty-state">
               Data pengguna belum dimuat.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+
+
+<!-- ACTIVITY LOG PAGE -->
+<section id="activity" class="page-section">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">SYSTEM MONITORING</p>
+      <h2>Activity Log</h2>
+      <p class="muted">
+        Riwayat aktivitas Admin dan Petugas dalam sistem InvenPro.
+      </p>
+    </div>
+  </div>
+
+  <section class="panel table-panel">
+    <div class="table-heading">
+      <div>
+        <h3>Riwayat Aktivitas</h3>
+        <p class="muted">Aktivitas terbaru pengguna</p>
+      </div>
+      <span class="data-count" id="activity-count">0 aktivitas</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Pengguna</th>
+            <th>Aktivitas</th>
+            <th>Detail</th>
+            <th>Waktu</th>
+          </tr>
+        </thead>
+        <tbody id="activity-body">
+          <tr>
+            <td colspan="5" class="empty-state">
+              Belum ada aktivitas.
             </td>
           </tr>
         </tbody>
